@@ -165,11 +165,13 @@ impl Simulator {
             }
         }
         let mut result = 0u32;
-        let mut norm = probability_zero.sqrt();
-        if rand_number > probability_zero {
+        let norm = if rand_number > probability_zero {
             result = 1;
-            norm = (1. - probability_zero).sqrt();
-        }
+            (1. - probability_zero).sqrt()
+        }else{
+            probability_zero.sqrt()
+        };
+
         (result, norm)
     }
 
@@ -194,7 +196,6 @@ impl Simulator {
         let (result, norm) = self.apply_decision(qubit);
         let mut state_vector_clone = self.state_vector.clone();
         self.state_vector = vec![];
-        let default_value = (0.,0.).to_complex();
 
         state_vector_clone = state_vector_clone.iter().enumerate()
             .take(self.amplitudes() as usize).map(|(i, value)|{
@@ -206,9 +207,8 @@ impl Simulator {
         }).collect();
 
         if result == 1 {
-            for i in 0..self.amplitudes() as usize {
+            for (i, state_vector_value) in state_vector_clone.iter().enumerate().take(self.amplitudes() as usize) {
                 let index = !(1 << qubit) & i;
-                let state_vector_value = self.state_vector.get(index).unwrap_or(&default_value);
                 self.state_vector[index] = state_vector_value + state_vector_clone[i];
             }
         } else {
