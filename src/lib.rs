@@ -48,38 +48,8 @@ pub fn simulate(js_gates: &JsValue, circuit_regs: &JsValue, shots: u32, seed: u3
     utils::set_panic_hook();
 
     let gates: Vec<gate::Gate> = js_gates.into_serde().unwrap();
-
-    // for gate in gates.iter(){
-    //     log!("{}", gate.to_string());
-    // }
-
     let regs : CircuitRegs = circuit_regs.into_serde().unwrap();
-
-    // for reg in regs.q_regs.iter() {
-    //     log!("qreg.label: {}  qreg.value: {}", reg.label, reg.size);
-    // }
-
-    // for reg in regs.c_regs.iter() {
-    //     log!("creg.label: {}  creg.value: {}", reg.label, reg.size);
-    // }
 
     let mut sim = Simulator::new((regs.q_regs, regs.c_regs));
     sim.shots(shots).seed(seed).run(gates);
-
-    // for (i, state) in sim.state_vector.iter().enumerate() {
-    //    log!("{}: {}", i, state);
-    // }
-
-    // for (i, probability) in sim.probabilities.unwrap().iter().enumerate() {
-    //     log!("{} probilities: {:?}", i, probability);
-    // }
-
-    log!("Density Matrix: \n");
-    // for prob in sim.get_density_matrix().iter(){
-    //     log!("{:?}", prob);
-    // }
-
-    let dm = sim.get_density_matrix();
-    log!("{:?}", dm.last().unwrap()[0]);
-    log!("{:?}", dm.last().unwrap().last().unwrap());
 }

@@ -1,9 +1,22 @@
-# Quantum Statevector Simulator
+<div align="center">
 
-This is a very simple implementation of an ideal statevector quantum simulator.
-It's intended to be used in web app as a WebAssmebly module, written in Rust, so building a native version should be straightforward (and is planned). 
+  <h1><code>WASM Quantum State Vector Simulator</code></h1>
 
-The `www` directory has been used for testing, benchmarking and comparising reasons, there's a missing piece though (a JavaScript implementation) that will be added soon, so in the meantime it's probably not very useful for others than me.    
+  <strong>This is an ideal (no noise) quantum state vector simulator written in Rust
+  and compiled to WebAssembly so it can be embeded in a webpage (or any other WASM host).</strong>
+  <strong>The `www` directory has been used for testing, benchmarking and comparising reasons, there's a missing piece though (a JavaScript implementation) that will be added soon, so in the meantime it's probably not very useful for others than me.</strong>
+
+  <p>
+    <a href="https://travis-ci.org/atilag/statevector-simulator"><img src="https://img.shields.io/travis/atilag/statevector-simulator.svg?style=flat-square" alt="Build Status" /></a>
+  </p>
+
+  <h3>
+    <a href="#usage">Usage</a>
+  </h3>
+
+  <sub>Built with 🦀 by <a href="https://qiskit.org/">The Qiskit community</a></sub>
+</div>
+
 
 ### 🛠️ Build with `wasm-pack build`
 
@@ -22,4 +35,3 @@ wasm-pack test --headless --firefox
 ```
 wasm-pack publish
 ```
-
