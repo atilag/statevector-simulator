@@ -73,13 +73,4 @@ pub fn simulate(js_gates: &JsValue, circuit_regs: &JsValue, shots: u32, seed: u3
     // for (i, probability) in sim.probabilities.unwrap().iter().enumerate() {
     //     log!("{} probilities: {:?}", i, probability);
     // }
-
-    log!("Density Matrix: \n");
-    // for prob in sim.get_density_matrix().iter(){
-    //     log!("{:?}", prob);
-    // }
-
-    let dm = sim.get_density_matrix();
-    log!("{:?}", dm.last().unwrap()[0]);
-    log!("{:?}", dm.last().unwrap().last().unwrap());
 }
