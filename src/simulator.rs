@@ -61,6 +61,14 @@ pub struct Simulator {
 }
 
 impl Simulator {
+    /**
+     * Creates a new instance of the Simulator.
+     *
+     * # Arguments
+     * * `q_regs` - A Vector of QuantumRegister objects that represent every qbit
+     * * `c_regs` - A Vector of ClassiclRegister objects that represent every classical register
+     *
+     */
     pub fn new((q_regs, c_regs): (Vec<QuantumRegister>, Vec<ClassicalRegister>)) -> Simulator {
 
         let (num_qubits, num_cbits) = calculate_num_registers(&q_regs, &c_regs);
@@ -78,18 +86,53 @@ impl Simulator {
         }
     }
 
+    /**
+     * Sets the number of times a circuit will run.
+     *
+     * # Arguments
+     * * `shots` - How many times the circuit will be executed
+     * 
+     * # Returns
+     * * An instance of the simulator object with the new value in it's state
+     *   Builder pattern
+     */
     pub fn shots(&mut self, shots: u32) -> &mut Simulator {
         self.config.shots = shots;
         self
     }
 
+    /**
+     * Sets the initial seed for the random number generator engine
+     *
+     * # Arguments
+     * * `seed` - The inital seed
+     *
+     * # Returns
+     * * An instance of the simulator object with the new value in it's state
+     *   Builder pattern
+     */
     pub fn seed(&mut self, seed: u32) -> &mut Simulator {
         self.config.seed = seed;
         self.rand = SeedableRng::seed_from_u64(u64::from(self.config.seed));
         self
     }
 
-
+    /**
+     * Runs the circuit.
+     *
+     * # Arguments
+     * * `gates` - A Vector of gates conforming the circuit to be run
+     *
+     * # Returns
+     * * A HashMap with the number of times a possible bitstring has been returned
+     *   as a consequence of measuring the quantum state in the end of the circuit
+     *   execution
+     * # Output example:
+     *   {"10010": 54, "11110": 46} -> The circuit has run 100 times (56+46) and
+     *                                 54 times has returned the bitstring "10010"
+     *                                 and 46 has returned "11110" bistring.
+     *
+     */
     pub fn run(&mut self, gates: Vec<Gate>)
         -> Option<HashMap<String, u32>> {
         let mut counts = HashMap::new();
@@ -116,6 +159,11 @@ impl Simulator {
         state_to_string(classical_state, self.num_qubits)
     }
 
+    /**
+     * Returns the number of total amplitudes for the circuit being run.
+     * # Remarks
+     * The number of total amplitudes is just:  2 ^ number_of_qubits.
+     */
     fn amplitudes(&self) -> u64 {
         1 << self.num_qubits
     }
@@ -252,6 +300,14 @@ impl Simulator {
         }
     }
 
+    /**
+     * Calculates the probability of every amplitude in the state vector
+     *
+     * # Remarks
+     * The probabilities are represented in the range of 0 to 100.
+     * Basically, a probability is the absolute (no negative values) of an amplitude to the square:
+     * p = |amp|^2
+     */
     fn calculate_probabilities(&mut self) {
         self.probabilities = Some(self.state_vector.iter()
             .enumerate()
@@ -266,22 +322,9 @@ impl Simulator {
         }).collect());
     }
 
-    // pub fn get_density_matrix(&self) -> Vec<Vec<Complex<f64>>> {
-    //    let mut density_matrix: Vec<Vec<Complex<f64>>> = vec![];
-    //    let default_value = (0.,0.).to_complex();
-    //    for index in 0..self.amplitudes() as usize {
-    //        let ref mut row: Vec<Complex<f64>> = vec![];
-    //        let state_vector_value = self.state_vector.get(index).unwrap_or(&default_value);
-    //        for index2 in 0..self.amplitudes() as usize {
-    //            let column = self.state_vector.get(index2).unwrap_or(&default_value);
-    //            let outter = (column.re, column.im * -1.0).to_complex();
-    //            row.push(outter * state_vector_value);
-    //        }
-    //        density_matrix.push(row.to_vec());
-    //    }
-    //    density_matrix
-    // }
-
+    /**
+     * Return the density matrix representation of the state vector
+     */
     pub fn get_density_matrix(&self) -> Vec<Vec<Complex<f64>>> {
         self.state_vector.iter().take(self.amplitudes() as usize).map(|state_row|{
             self.state_vector.iter().take(self.amplitudes() as usize).map(|column|{
@@ -360,6 +403,9 @@ fn get_gate_params(label: &str, params: &Option<Vec<GateParams>>) -> (f64, f64, 
     (theta, phi, lambda)
 }
 
+/**
+ * Returns the unitary matrix representation of the rotation gate
+ */
 fn get_unitary_matrix(gate: &Gate) -> na::Matrix2<Complex<f64>> {
     let (theta, phi, lambda) = get_gate_params(&gate.label, &gate.params);
     na::Matrix2::new(
@@ -396,6 +442,9 @@ fn apply_bit(bit: u32, index: u32, bit_string: u32) -> u32 {
     result
 }
 
+/**
+ * Returns the string representation of the classical state (the bitstring)
+ */
 fn state_to_string(classical_state: u32, num_qubits: u32) -> String {
     format!("{:0width$b}", classical_state, width=num_qubits as usize)
 }
