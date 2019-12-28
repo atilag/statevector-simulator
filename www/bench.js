@@ -2717,26 +2717,19 @@ const VectorSimulator = require('./ibm-q-simulator/src/index.js').default;
 const js_simulator = new VectorSimulator(circuit_regs);
 var bench = require('nanobench')
 
-bench('JS Statevector 70 times', function (b) {
+bench('JS Statevector', function (b) {
 
   b.start()
-
-  for (var i = 0; i < 1; i++) {
-    js_simulator.run(circuit, 0, 69);
-  }
-
+  js_simulator.run(circuit, 20, 69);
   b.end()
 })
 
-bench('WASM Statevector 70 times', function (b) {
+bench('WASM Statevector', function (b) {
 
   b.start()
-
-  for (var i = 0; i < 1; i++) {
-    wasm.simulate(circuit, circuit_regs, 0, 69);
-  }
-
+  let simulator = wasm.WasmSimulator.new(circuit_regs);
+  simulator.shots(20);
+  simulator.seed(69);
+  simulator.run(circuit);
   b.end()
 })
-
-

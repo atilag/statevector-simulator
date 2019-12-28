@@ -27,6 +27,8 @@ use simulator::Simulator;
 use classical_register::ClassicalRegister;
 use quantum_register::QuantumRegister;
 use serde::Deserialize;
+use std::collections::HashMap;
+use num::complex::Complex;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -43,13 +45,53 @@ struct CircuitRegs {
 }
 
 #[wasm_bindgen]
-pub fn simulate(js_gates: &JsValue, circuit_regs: &JsValue, shots: u32, seed: u32) {
+pub struct WasmSimulator {
+    simulator: Simulator,
+}
 
-    utils::set_panic_hook();
+#[wasm_bindgen]
+impl WasmSimulator {
+    pub fn new(circuit_regs: &JsValue) -> WasmSimulator {
+        //TODO: Lazy one-time initialize?
+        utils::set_panic_hook();
 
-    let gates: Vec<gate::Gate> = js_gates.into_serde().unwrap();
-    let regs : CircuitRegs = circuit_regs.into_serde().unwrap();
+        let regs : CircuitRegs = circuit_regs.into_serde().unwrap();
 
-    let mut sim = Simulator::new((regs.q_regs, regs.c_regs));
-    sim.shots(shots).seed(seed).run(gates);
+        WasmSimulator{
+            simulator: Simulator::new((regs.q_regs, regs.c_regs))
+        }
+    }
+
+    pub fn shots(&mut self, shots: u32) {
+        self.simulator.shots(shots);
+    }
+
+    pub fn seed(&mut self, seed: u32) {
+        self.simulator.seed(seed);
+    }
+
+    pub fn run(&mut self, js_gates: &JsValue) {
+        let gates: Vec<gate::Gate> = js_gates.into_serde().unwrap();
+        self.simulator.run(gates);
+    }
+
+    pub fn get_counts(&self) -> JsValue {
+        let counts = self.simulator.counts.clone().unwrap();
+        JsValue::from_serde(&counts).unwrap()
+    }
+
+    pub fn get_probabilities(&self) -> JsValue {
+        let probs = self.simulator.probabilities.clone().unwrap();
+        JsValue::from_serde(&probs).unwrap()
+    }
+
+    pub fn get_state_vector(&self) -> JsValue {
+        let state_vector = self.simulator.state_vector.clone();
+        JsValue::from_serde(&state_vector).unwrap()
+    }
+
+    pub fn get_density_matrix(&self) -> JsValue {
+        let density_matrix = self.simulator.get_density_matrix();
+        JsValue::from_serde(&density_matrix).unwrap()
+    }
 }

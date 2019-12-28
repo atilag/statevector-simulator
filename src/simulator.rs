@@ -12,6 +12,7 @@ use rand::rngs::StdRng;
 use rand::Rng;
 //use meval;
 use std::collections::HashMap;
+use wasm_bindgen::prelude::*;
 
 trait ToComplex {
     fn to_complex(&self) -> Complex<f64>;
@@ -57,7 +58,8 @@ pub struct Simulator {
     classical_state: u32,
     pub state_vector: Vec<Complex<f64>>,
     rand: StdRng,
-    pub probabilities: Option<HashMap<String, f64>>
+    pub probabilities: Option<HashMap<String, f64>>,
+    pub counts: Option<HashMap<String, u32>>
 }
 
 impl Simulator {
@@ -83,6 +85,7 @@ impl Simulator {
             state_vector: vec![(0.,0.).to_complex(); 2usize.pow(num_qubits)],
             rand: SeedableRng::seed_from_u64(0u64),
             probabilities: None,
+            counts: None
         }
     }
 
@@ -91,7 +94,7 @@ impl Simulator {
      *
      * # Arguments
      * * `shots` - How many times the circuit will be executed
-     * 
+     *
      * # Returns
      * * An instance of the simulator object with the new value in it's state
      *   Builder pattern
@@ -133,24 +136,21 @@ impl Simulator {
      *                                 and 46 has returned "11110" bistring.
      *
      */
-    pub fn run(&mut self, gates: Vec<Gate>)
-        -> Option<HashMap<String, u32>> {
+    pub fn run(&mut self, gates: Vec<Gate>){
         let mut counts = HashMap::new();
         self.initialize();
-
         if self.config.shots > 0 {
             for _ in 0..self.config.shots {
                 self.initialize();
                 self.apply_gates(&gates, true);
                 let final_state = self.get_state_string(self.classical_state);
-                *counts.entry(final_state).or_insert(0u32) += 1;
+                *(counts.entry(final_state).or_insert(0u32)) += 1;
             }
-            Some(counts)
+            self.counts = Some(counts);
         } else {
             self.initialize();
             self.apply_gates(&gates, false);
             self.calculate_probabilities();
-            Some(counts)
         }
     }
 
