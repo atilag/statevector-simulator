@@ -308,18 +308,19 @@ impl Simulator {
      * Basically, a probability is the absolute (no negative values) of an amplitude to the square:
      * p = |amp|^2
      */
-    fn calculate_probabilities(&mut self) {
+    pub fn calculate_probabilities(&mut self) {
         self.probabilities = Some(self.state_vector.iter()
             .enumerate()
             .filter_map(|(i, state_value)| {
-            let state_rounded = state_value.round();
-            if state_rounded.re > 0. {
-                let binary_state = self.get_state_string(i as u32);
-                let probability = (state_rounded.norm().powi(2)) * 100.;
-                return Some((binary_state, probability));
-            }
-            None
-        }).collect());
+                let state_rounded = state_value.round();
+                if state_rounded.re > 0. {
+                    let binary_state = self.get_state_string(i as u32);
+                    let probability = (state_rounded.norm().powi(2)) * 100.;
+                    return Some((binary_state, probability));
+                }
+                None
+            }).collect()
+        );
     }
 
     /**

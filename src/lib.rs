@@ -27,8 +27,6 @@ use simulator::Simulator;
 use classical_register::ClassicalRegister;
 use quantum_register::QuantumRegister;
 use serde::Deserialize;
-use std::collections::HashMap;
-use num::complex::Complex;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -80,12 +78,18 @@ impl WasmSimulator {
         JsValue::from_serde(&counts).unwrap()
     }
 
-    pub fn get_probabilities(&self) -> JsValue {
-        let probs = self.simulator.probabilities.clone().unwrap();
-        JsValue::from_serde(&probs).unwrap()
+    pub fn get_probabilities(&mut self) -> JsValue {
+        let probabilities = match self.simulator.probabilities.clone() {
+            Some(prob) => prob,
+            None => {
+                self.simulator.calculate_probabilities();
+                self.simulator.probabilities.clone().unwrap()
+            }
+        };
+        JsValue::from_serde(&probabilities).unwrap()
     }
 
-    pub fn get_state_vector(&self) -> JsValue {
+    pub fn get_amplitudes(&self) -> JsValue {
         let state_vector = self.simulator.state_vector.clone();
         JsValue::from_serde(&state_vector).unwrap()
     }
